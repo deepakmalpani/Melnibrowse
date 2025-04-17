@@ -3,7 +3,8 @@ import sys
 import ssl
 
 class URL:
-    def __init__(self, url): 
+    def __init__(self, url):
+        
         self.scheme, url = url.split("://", 1) # split the scheme from the rest of the URL
         assert self.scheme in ["http", "https"] # the browser only supports http
         
@@ -22,7 +23,18 @@ class URL:
             self.port = int(port)
         
         self.path = "/" + url
-
+        
+        self.request_headers = {
+            "Host" : self.host,
+            "Connection" : "close",
+            "User-Agent" : "melnibrowse"
+        }
+    
+    def add_headers(self,request, request_headers):
+        for key, value in request_headers.items():
+            request += "{}: {}\r\n".format(key, value)
+        return request
+    
     def request(self):
         s = socket.socket(
             family=socket.AF_INET,
@@ -36,8 +48,8 @@ class URL:
             ctx = ssl.create_default_context()
             s = ctx.wrap_socket(s, server_hostname= self.host)
 
-        request = "GET {} HTTP/1.0\r\n".format(self.path)
-        request += "Host: {}\r\n".format(self.host)
+        request = "GET {} HTTP/1.1\r\n".format(self.path) # we can now use http/1.1 instead of 1.0
+        request = self.add_headers(request, self.request_headers)
         request += "\r\n"
         s.send(request.encode("utf8"))
         response = s.makefile("r", encoding = "utf8", newline="\r\n") #returns file like object containing every byte received from server and decodes it using utf8
