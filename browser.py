@@ -2,23 +2,26 @@ import socket
 import sys
 import ssl
 
+DEFAULT_URL = 'file://C:/Users/deepa/Desktop/test.txt'
+
 class URL:
     def __init__(self, url):
-        
         self.scheme, url = url.split("://", 1) # split the scheme from the rest of the URL
-        assert self.scheme in ["http", "https"] # the browser only supports http
+        assert self.scheme in ["http", "https","file"] # the browser only supports http
         
         if self.scheme == "http":
             self.port = 80
         elif self.scheme == "https":
             self.port = 443   # Encryptyed HTTP connections usually use port 443 instead of port 80
+        elif self.scheme == "file":
+            self.file_path = url
 
         if "/" not in url:
             url = url + "/" # add a trailing slash if there is no path
         
         self.host, url = url.split("/", 1) # split the host from the rest of the URL
         
-        if ":" in self.host:
+        if not self.file_path and ":" in self.host:
             self.host, port = self.host.split(":", 1)
             self.port = int(port)
         
@@ -72,6 +75,12 @@ class URL:
             s.close()
             
             return content
+    
+    def open_file(self):
+        if self.file_path :
+            with open(self.file_path, 'r') as file:
+                content = file.read()
+                print(content)
         
 def show( body):
     in_tag = False
@@ -84,9 +93,15 @@ def show( body):
             print(c, end="")
 
 def load(url):
+    if url.scheme == "file":
+        url.open_file()
+        return
+    
     body = url.request()
     show(body)
 
 if __name__ == "__main__":
-    load(URL(sys.argv[1]))
-        
+    if len(sys.argv) == 1:
+        load(URL(DEFAULT_URL))
+    else:
+        load(URL(sys.argv[1]))
