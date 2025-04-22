@@ -6,16 +6,27 @@ DEFAULT_URL = 'file://C:/Users/deepa/Desktop/test.txt'
 
 class URL:
     def __init__(self, url):
-        self.scheme, url = url.split("://", 1) # split the scheme from the rest of the URL
-        assert self.scheme in ["http", "https","file"] # the browser only supports http
+        self.file_path = None
+        self.inline_html = None
+        
+        if "://" in url:
+            self.scheme, url = url.split("://", 1) # split the scheme from the rest of the URL
+        elif ":" in url:
+            self.scheme, url = url.split(":", 1) # split the scheme when the url doesn't contain :// for eg: data:text/html
+        
+        assert self.scheme in ["http", "https","file","data"] # the browser now supports http, https, file, data
         
         if self.scheme == "http":
             self.port = 80
         elif self.scheme == "https":
             self.port = 443   # Encryptyed HTTP connections usually use port 443 instead of port 80
         elif self.scheme == "file":
-            self.file_path = url
-
+            self.file_path = url # extract the filepath in case of file scheme
+        elif self.scheme == "data":
+            if "," in url:
+                document_type, self.inline_html = url.split(",", 1)
+                print(document_type)   
+                
         if "/" not in url:
             url = url + "/" # add a trailing slash if there is no path
         
@@ -95,6 +106,10 @@ def show( body):
 def load(url):
     if url.scheme == "file":
         url.open_file()
+        return
+    
+    if url.scheme == "data":
+        show(url.inline_html)
         return
     
     body = url.request()
