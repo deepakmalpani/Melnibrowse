@@ -95,13 +95,18 @@ class URL:
         
 def show( body):
     in_tag = False
+    parsed_html = ""
     for c in body:
         if c == "<":
             in_tag = True
         elif c == ">":
             in_tag = False
         elif not in_tag:
-            print(c, end="")
+            parsed_html += c
+
+    parsed_html = parsed_html.replace("&lt;","<")
+    parsed_html = parsed_html.replace("&gt;",">")
+    print(parsed_html)
 
 def load(url):
     if url.scheme == "file":
