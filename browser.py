@@ -5,16 +5,12 @@ import ssl
 DEFAULT_URL = 'file://C:/Users/deepa/Desktop/test.txt'
 
 class URL:
-    def __init__(self, url):
+    def __init__(self, url, scheme):
         self.file_path = None
         self.inline_html = None
+        self.scheme = scheme
         
-        if "://" in url:
-            self.scheme, url = url.split("://", 1) # split the scheme from the rest of the URL
-        elif ":" in url:
-            self.scheme, url = url.split(":", 1) # split the scheme when the url doesn't contain :// for eg: data:text/html
-        
-        assert self.scheme in ["http", "https","file","data"] # the browser now supports http, https, file, data
+        assert self.scheme in ["http", "https","file","data",'view-source'] # the browser now supports http, https, file, data
         
         if self.scheme == "http":
             self.port = 80
@@ -25,7 +21,7 @@ class URL:
         elif self.scheme == "data":
             if "," in url:
                 document_type, self.inline_html = url.split(",", 1)
-                print(document_type)   
+                print(document_type)
                 
         if "/" not in url:
             url = url + "/" # add a trailing slash if there is no path
@@ -92,7 +88,19 @@ class URL:
             with open(self.file_path, 'r') as file:
                 content = file.read()
                 print(content)
-        
+
+def extract_scheme(url):
+    scheme = ""   
+    
+    if ":" in url:
+        scheme, url = url.split(":", 1) # split the scheme from the rest of the URL
+        if url[0:2] == "//":
+            url = url[2:]  # remove leading // in case scheme is separated by ://
+    
+    assert scheme in ["http", "https","file","data",'view-source'] # the browser now supports http, https, file, data, view-source
+    
+    return scheme, url
+      
 def show( body):
     in_tag = False
     parsed_html = ""
@@ -108,7 +116,7 @@ def show( body):
     parsed_html = parsed_html.replace("&gt;",">")
     print(parsed_html)
 
-def load(url):
+def load(url, view_source = False):
     if url.scheme == "file":
         url.open_file()
         return
@@ -117,11 +125,22 @@ def load(url):
         show(url.inline_html)
         return
     
+    if view_source:
+        print(url.request())
+        return
+    
     body = url.request()
     show(body)
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
-        load(URL(DEFAULT_URL))
+        scheme, url = extract_scheme(DEFAULT_URL)
+        load(URL(url, scheme))
     else:
-        load(URL(sys.argv[1]))
+        scheme, url = extract_scheme(sys.argv[1])
+        if scheme == "view-source":
+            scheme, url = extract_scheme(url)
+            print(scheme, url)
+            load(URL(url, scheme), view_source = True)
+        else:
+            load(URL(url, scheme))
