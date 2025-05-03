@@ -18,9 +18,15 @@ class Browser:
         self.canvas.create_rectangle(10, 20, 400, 300)
         self.canvas.create_oval(100, 100, 150, 150)
         self.canvas.create_text(200, 150, text = "Hi!")
-        for c in parsed_html:
-            self.canvas.create_text(100, 100, text = c)
         
+        HSTEP, VSTEP = 13, 18
+        cursor_x, cursor_y = HSTEP, VSTEP
+        for c in parsed_html:
+            self.canvas.create_text(cursor_x, cursor_y, text = c)
+            cursor_x += HSTEP
+            if cursor_x >= WIDTH - HSTEP:
+                cursor_y += VSTEP
+                cursor_x = HSTEP
 
 # if __name__ == "__main__":
 #     Browser().load("test")
