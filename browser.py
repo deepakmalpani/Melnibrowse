@@ -3,6 +3,7 @@ import sys
 from url import DEFAULT_URL, URL, extract_scheme, load, show
 
 WIDTH, HEIGHT = 800, 600
+SCROLL_STEP = 100
 
 class Browser:
     def __init__(self):
@@ -13,24 +14,35 @@ class Browser:
             height = HEIGHT
         )
         self.canvas.pack()
+        self.scroll = 0
+        self.window.bind("<Down>", self.scrolldown)
         
-    def load(self, parsed_html):
-        self.canvas.create_rectangle(10, 20, 400, 300)
-        self.canvas.create_oval(100, 100, 150, 150)
-        self.canvas.create_text(200, 150, text = "Hi!")
+    def scrolldown(self, e):
+        self.scroll += SCROLL_STEP
+        self.draw()
         
+    def layout(self, parsed_html):
         HSTEP, VSTEP = 13, 18
         cursor_x, cursor_y = HSTEP, VSTEP
+        display_list = []
         for c in parsed_html:
-            self.canvas.create_text(cursor_x, cursor_y, text = c)
+            display_list.append((cursor_x, cursor_y, c))
             cursor_x += HSTEP
             if cursor_x >= WIDTH - HSTEP:
                 cursor_y += VSTEP
                 cursor_x = HSTEP
+        
+        return display_list
+    
+    def draw(self):
+        self.canvas.delete("all")
+        for x, y, c in self.display_list:
+            self.canvas.create_text(x, y - self.scroll, text = c)
+            
+    def load(self, parsed_html):
+        self.display_list = self.layout(parsed_html)
+        self.draw()
 
-# if __name__ == "__main__":
-#     Browser().load("test")
-#     tkinter.mainloop()
 if __name__ == "__main__":
     
     view_source = False
