@@ -14,10 +14,12 @@ class Browser:
         )
         self.canvas.pack()
         
-    def load(self, url):
+    def load(self, parsed_html):
         self.canvas.create_rectangle(10, 20, 400, 300)
         self.canvas.create_oval(100, 100, 150, 150)
         self.canvas.create_text(200, 150, text = "Hi!")
+        for c in parsed_html:
+            self.canvas.create_text(100, 100, text = c)
         
 
 # if __name__ == "__main__":
@@ -33,12 +35,14 @@ if __name__ == "__main__":
         scheme, url = extract_scheme(sys.argv[1])
         if scheme == "view-source":
             scheme, url = extract_scheme(url)
-            print(scheme, url)
             view_source = True
             
     body = load(URL(url, scheme))
+    
     if not view_source:
         parsed_html = show(body)
+        Browser().load(parsed_html)
+        tkinter.mainloop()
         print(parsed_html)
     else:
         print(body)
