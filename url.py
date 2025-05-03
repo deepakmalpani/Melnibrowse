@@ -1,5 +1,4 @@
 import socket
-import sys
 import ssl
 
 DEFAULT_URL = 'file://C:/Users/deepa/Desktop/test.txt'
