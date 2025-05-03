@@ -115,33 +115,14 @@ def show( body):
 
     parsed_html = parsed_html.replace("&lt;","<")
     parsed_html = parsed_html.replace("&gt;",">")
-    print(parsed_html)
+    return parsed_html
 
-def load(url, view_source = False):
+def load(url):
     if url.scheme == "file":
         url.open_file()
         return
     
     if url.scheme == "data":
-        show(url.inline_html)
-        return
+        return url.inline_html
     
-    if view_source:
-        print(url.request())
-        return
-    
-    body = url.request()
-    show(body)
-
-if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        scheme, url = extract_scheme(DEFAULT_URL)
-        load(URL(url, scheme))
-    else:
-        scheme, url = extract_scheme(sys.argv[1])
-        if scheme == "view-source":
-            scheme, url = extract_scheme(url)
-            print(scheme, url)
-            load(URL(url, scheme), view_source = True)
-        else:
-            load(URL(url, scheme))
+    return url.request()
