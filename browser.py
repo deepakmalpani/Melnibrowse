@@ -16,27 +16,32 @@ class Browser:
         self.canvas.pack()
         self.scroll = 0
         self.window.bind("<Down>", self.scrolldown)
+        self.HSTEP = 13
+        self.VSTEP = 18
         
     def scrolldown(self, e):
         self.scroll += SCROLL_STEP
         self.draw()
         
     def layout(self, parsed_html):
-        HSTEP, VSTEP = 13, 18
-        cursor_x, cursor_y = HSTEP, VSTEP
+        cursor_x, cursor_y = self.HSTEP, self.VSTEP
         display_list = []
         for c in parsed_html:
             display_list.append((cursor_x, cursor_y, c))
-            cursor_x += HSTEP
-            if cursor_x >= WIDTH - HSTEP:
-                cursor_y += VSTEP
-                cursor_x = HSTEP
+            cursor_x += self.HSTEP
+            if cursor_x >= WIDTH - self.HSTEP:
+                cursor_y += self.VSTEP
+                cursor_x = self.HSTEP
         
         return display_list
     
     def draw(self):
         self.canvas.delete("all")
         for x, y, c in self.display_list:
+            if y > self.scroll + HEIGHT:
+                continue
+            if y + self.VSTEP < self.scroll : 
+                continue
             self.canvas.create_text(x, y - self.scroll, text = c)
             
     def load(self, parsed_html):
