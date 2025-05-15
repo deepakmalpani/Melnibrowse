@@ -16,12 +16,18 @@ class Browser:
         self.canvas.pack()
         self.scroll = 0
         self.window.bind("<Down>", self.scrolldown)
+        self.window.bind("<Up>", self.scrollup)
         self.HSTEP = 13
         self.VSTEP = 18
         
     def scrolldown(self, e):
         self.scroll += SCROLL_STEP
         self.draw()
+        
+    def scrollup(self, e):
+        if self.scroll - SCROLL_STEP > 0 :
+            self.scroll -= SCROLL_STEP
+            self.draw()
         
     def layout(self, parsed_html):
         cursor_x, cursor_y = self.HSTEP, self.VSTEP
