@@ -27,8 +27,11 @@ class Browser:
         cursor_x, cursor_y = self.HSTEP, self.VSTEP
         display_list = []
         for c in parsed_html:
-            display_list.append((cursor_x, cursor_y, c))
-            cursor_x += self.HSTEP
+            if c == '\n':
+                cursor_y += self.VSTEP
+            else:
+                display_list.append((cursor_x, cursor_y, c))
+                cursor_x += self.HSTEP
             if cursor_x >= WIDTH - self.HSTEP:
                 cursor_y += self.VSTEP
                 cursor_x = self.HSTEP
