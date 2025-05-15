@@ -17,6 +17,7 @@ class Browser:
         self.scroll = 0
         self.window.bind("<Down>", self.scrolldown)
         self.window.bind("<Up>", self.scrollup)
+        self.window.bind("<MouseWheel>", self.handle_mwheel)
         self.HSTEP = 13
         self.VSTEP = 18
         
@@ -27,6 +28,11 @@ class Browser:
     def scrollup(self, e):
         if self.scroll - SCROLL_STEP > 0 :
             self.scroll -= SCROLL_STEP
+            self.draw()
+            
+    def handle_mwheel(self, e):
+        if self.scroll - e.delta > 0: 
+            self.scroll += -1 * e.delta
             self.draw()
         
     def layout(self, parsed_html):
