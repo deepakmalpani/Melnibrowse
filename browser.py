@@ -8,18 +8,23 @@ SCROLL_STEP = 100
 class Browser:
     def __init__(self):
         self.window = tkinter.Tk()
+        self.height = HEIGHT
+        self.width = WIDTH
         self.canvas = tkinter.Canvas(
             self.window,
-            width= WIDTH,
-            height = HEIGHT
-        )
-        self.canvas.pack()
+            width= self.width,
+            height = self.height,
+            highlightthickness = 0
+        )       
+        self.canvas.pack(fill = tkinter.BOTH, expand= True)
         self.scroll = 0
         self.window.bind("<Down>", self.scrolldown)
         self.window.bind("<Up>", self.scrollup)
         self.window.bind("<MouseWheel>", self.handle_mwheel)
+        self.canvas.bind("<Configure>", self.handle_resize)
         self.HSTEP = 13
         self.VSTEP = 18
+        self.parsed_html = None
         
     def scrolldown(self, e):
         self.scroll += SCROLL_STEP
@@ -34,6 +39,12 @@ class Browser:
         if self.scroll - e.delta > 0: 
             self.scroll += -1 * e.delta
             self.draw()
+            
+    def handle_resize(self, e):
+        self.canvas.config(width= e.width, height= e.height)
+        self.height = e.height
+        self.width = e.width
+        self.load(self.parsed_html)
         
     def layout(self, parsed_html):
         cursor_x, cursor_y = self.HSTEP, self.VSTEP
@@ -44,7 +55,7 @@ class Browser:
             else:
                 display_list.append((cursor_x, cursor_y, c))
                 cursor_x += self.HSTEP
-            if cursor_x >= WIDTH - self.HSTEP:
+            if cursor_x >= self.width - self.HSTEP:
                 cursor_y += self.VSTEP
                 cursor_x = self.HSTEP
         
@@ -53,13 +64,14 @@ class Browser:
     def draw(self):
         self.canvas.delete("all")
         for x, y, c in self.display_list:
-            if y > self.scroll + HEIGHT:
+            if y > self.scroll + self.height:
                 continue
             if y + self.VSTEP < self.scroll : 
                 continue
             self.canvas.create_text(x, y - self.scroll, text = c)
             
     def load(self, parsed_html):
+        self.parsed_html = parsed_html
         self.display_list = self.layout(parsed_html)
         self.draw()
 
